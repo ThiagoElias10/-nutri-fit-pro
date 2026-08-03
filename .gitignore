@@ -1,0 +1,32 @@
+node_modules/
+dist/
+dist-exe/
+release/
+*.db
+*.db-shm
+*.db-wal
+*.log
+.env
+.jwt-secret
+.DS_Store
+Thumbs.db
+
+# Repositório antigo dentro da pasta do projeto
+Nutri-fit-pro/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build
+frontend/dist/
+frontend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

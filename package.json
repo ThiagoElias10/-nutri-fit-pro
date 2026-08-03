@@ -1,0 +1,62 @@
+{
+  "name": "nutrifit-pro",
+  "version": "1.0.0",
+  "description": "NutriFit Pro - Sistema inteligente de nutrição",
+  "main": "electron.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:frontend": "npm --prefix frontend run build",
+    "electron": "electron .",
+    "dist": "electron-builder build --win",
+    "dist:portable": "electron-builder build --win portable",
+    "lint": "oxlint src server.js electron.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "build": {
+    "appId": "com.nutrifit.pro",
+    "productName": "NutriFit Pro",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron.js",
+      "server.js",
+      "src/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "NutriFit Pro"
+    }
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "sql.js": "^1.11.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
+    "oxlint": "^1.77.0"
+  }
+}

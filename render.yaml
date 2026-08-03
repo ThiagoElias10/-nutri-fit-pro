@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: nutrifit-pro
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build:frontend
+    startCommand: node server.js
+    healthCheckPath: /api
+    autoDeploy: true
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
