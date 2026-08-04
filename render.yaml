@@ -3,7 +3,7 @@ services:
     name: nutrifit-pro
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build:frontend
+    buildCommand: npm install && npm --prefix frontend install && npm run build:frontend
     startCommand: node server.js
     healthCheckPath: /api
     autoDeploy: true
