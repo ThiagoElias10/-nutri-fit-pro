@@ -8,22 +8,30 @@ const db = require('./src/db');
 const routes = require('./src/routes');
 const logger = require('./src/logger');
 
-function originsPermitidas() {
+function originsPermitidas(req, res, next) {
   const lista = (process.env.CORS_ORIGINS || '')
     .split(',').map((s) => s.trim()).filter(Boolean);
-  return (origin, cb) => {
-    if (!origin) return cb(null, true);
-    if (lista.includes(origin)) return cb(null, true);
-    if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
-    return cb(new Error('Origem não permitida pelo CORS'));
-  };
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (lista.includes(origin)) return cb(null, true);
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+      try {
+        if (new URL(origin).host === req.headers.host) return cb(null, true);
+      } catch {
+        /* origem inválida */
+      }
+      return cb(new Error('Origem não permitida pelo CORS'));
+    },
+    credentials: true,
+  })(req, res, next);
 }
 
 function criarApp() {
   const app = express();
   app.disable('x-powered-by');
 
-  app.use(cors({ origin: originsPermitidas(), credentials: true }));
+  app.use(originsPermitidas);
   app.use(express.json({ limit: '10mb' }));
   app.use(cookieParser());
 

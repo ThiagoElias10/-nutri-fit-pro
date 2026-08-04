@@ -11,6 +11,7 @@ start().then(async (srv) => {
   const s = await fetch('http://localhost:3199/');
   console.log('GET / ->', s.status, (s.headers.get('content-type') || '').split(';')[0]);
 
+  srv.closeAllConnections();
   srv.close();
-  process.exit(0);
+  process.exitCode = 0;
 }).catch((e) => { console.error(e); process.exit(1); });
