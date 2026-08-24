@@ -24,7 +24,6 @@ Nutri-fit-pro/
 *.sw?
 
 # Build
-frontend/dist/
 frontend/node_modules/
 
 # OS

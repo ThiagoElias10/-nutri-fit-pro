@@ -114,8 +114,7 @@ function renderLogin() {
       } catch (err) { toast(err.message, 'error'); btn.disabled = false; btn.textContent = 'Criar Conta'; }
     }
   });
-}
-
+}   
 
 function initApp() {
   pingAcesso();
@@ -315,13 +314,12 @@ async function calcular() {
   const sexo = document.getElementById('cSexo').value;
   const atividade = Number(document.getElementById('cAtividade').value);
   const objetivo = document.querySelector('input[name="objetivo"]:checked').value;
-
   if (!idade || !peso || !altura) { toast('Preencha todos os campos', 'error'); return; }
 
   try {
     const res = await req('/avaliacoes/calcular', {
       method: 'POST',
-      body: { idade, peso, altura, sexo, atividade, objetivo }
+      body: { idade, peso, altura, sexo, atividade, objetivo },
     });
 
     state.ultimoResultado = { idade, peso, altura, sexo, atividade, objetivo };
