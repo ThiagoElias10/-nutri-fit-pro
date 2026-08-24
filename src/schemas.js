@@ -144,6 +144,10 @@ module.exports = {
     data_fim: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
     ativo: z.boolean().optional(),
   }),
+  gerarPlano: z.object({
+    client_id: idPositivo,
+    nome: z.string().trim().min(2).max(120).optional(),
+  }),
 
   diario: z.object({
     client_id: idOpcional,

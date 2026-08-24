@@ -99,6 +99,32 @@ router.post('/', verificarToken, validate(schemas.diario), (req, res) => {
   res.status(201).json({ ok: true });
 });
 
+// Buscar metas da avaliação mais recente para comparação com o diário
+router.get('/metas', verificarToken, (req, res) => {
+  const clientId = parseInt(req.query.client_id || req.usuario.id);
+  if (req.usuario.tipo === 'client' && clientId !== req.usuario.id) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+  if (req.usuario.tipo === 'professional' && clientId !== req.usuario.id && !verificarClienteAcessivel(req, clientId)) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+
+  const avaliacao = db.get(
+    'SELECT * FROM avaliacoes WHERE client_id = ? ORDER BY created_at DESC LIMIT 1',
+    [clientId]
+  );
+  if (!avaliacao) return res.json(null);
+
+  res.json({
+    calorias: avaliacao.calorias_alvo,
+    proteina: avaliacao.proteina_g,
+    carboidrato: avaliacao.carboidrato_g,
+    gordura: avaliacao.gordura_g,
+    objetivo: avaliacao.objetivo,
+    peso: avaliacao.peso,
+  });
+});
+
 router.delete('/:id', verificarToken, validate(idParams, 'params'), (req, res) => {
   const id = req.params.id;
   const entry = db.get('SELECT * FROM diario_alimentar WHERE id = ?', [id]);

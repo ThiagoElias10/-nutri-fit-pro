@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
-import { Plus, Trash2, Search, UtensilsCrossed } from 'lucide-react'
+import { Plus, Trash2, Search, UtensilsCrossed, Target } from 'lucide-react'
 
 export default function FoodDiary() {
   const { user } = useAuth()
@@ -10,6 +10,7 @@ export default function FoodDiary() {
   const [clientId, setClientId] = useState<number | ''>('')
   const [data, setData] = useState<any>(null)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [metas, setMetas] = useState<any>(null)
 
   const [foods, setFoods] = useState<any[]>([])
   const [foodSearch, setFoodSearch] = useState('')
@@ -22,11 +23,17 @@ export default function FoodDiary() {
     setData(d)
   }
 
+  const loadMetas = async () => {
+    const cid = clientId || undefined
+    const m = await api.foodDiary.metas(cid as any)
+    setMetas(m)
+  }
+
   useEffect(() => {
     if (isProOrAdmin) api.clients.list().then(setClients)
   }, [])
 
-  useEffect(() => { loadDiary() }, [clientId, date])
+  useEffect(() => { loadDiary(); loadMetas() }, [clientId, date])
 
   useEffect(() => {
     if (foodSearch.length > 1) api.foods.list(foodSearch).then((r) => setFoods(r.dados))
@@ -55,6 +62,17 @@ export default function FoodDiary() {
   const refeicoes = ['cafe', 'almoco', 'lanche', 'jantar', 'ceia']
   const refLabels: Record<string, string> = { cafe: 'Café da Manhã', almoco: 'Almoço', lanche: 'Lanche', jantar: 'Jantar', ceia: 'Ceia' }
 
+  const getPercentage = (current: number, target: number) => {
+    if (!target) return 0
+    return Math.min(Math.round((current / target) * 100), 100)
+  }
+
+  const getBarColor = (pct: number) => {
+    if (pct < 50) return 'bg-yellow-500'
+    if (pct <= 100) return 'bg-emerald-500'
+    return 'bg-red-500'
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -81,23 +99,63 @@ export default function FoodDiary() {
       </div>
 
       {data?.summary && (
-        <div className="grid grid-cols-4 gap-3">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
-            <p className="text-lg font-bold text-orange-400">{Math.round(data.summary.total.calorias)}</p>
-            <p className="text-xs text-gray-500">Calorias</p>
+        <div className="space-y-3">
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-orange-400">{Math.round(data.summary.total.calorias)}</p>
+              <p className="text-xs text-gray-500">Calorias</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-emerald-400">{Math.round(data.summary.total.proteina)}g</p>
+              <p className="text-xs text-gray-500">Proteína</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-blue-400">{Math.round(data.summary.total.carboidrato)}g</p>
+              <p className="text-xs text-gray-500">Carboidratos</p>
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
+              <p className="text-lg font-bold text-yellow-400">{Math.round(data.summary.total.gordura)}g</p>
+              <p className="text-xs text-gray-500">Gorduras</p>
+            </div>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
-            <p className="text-lg font-bold text-emerald-400">{Math.round(data.summary.total.proteina)}g</p>
-            <p className="text-xs text-gray-500">Proteína</p>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
-            <p className="text-lg font-bold text-blue-400">{Math.round(data.summary.total.carboidrato)}g</p>
-            <p className="text-xs text-gray-500">Carboidratos</p>
-          </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-3 text-center">
-            <p className="text-lg font-bold text-yellow-400">{Math.round(data.summary.total.gordura)}g</p>
-            <p className="text-xs text-gray-500">Gorduras</p>
-          </div>
+
+          {metas && (
+            <div className="bg-gray-900 border border-emerald-500/20 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Target className="w-4 h-4 text-emerald-400" />
+                <span>Progresso diário vs metas ({metas.objetivo})</span>
+              </div>
+
+              {[
+                { label: 'Calorias', current: data.summary.total.calorias, target: metas.calorias, unit: 'kcal', color: 'text-orange-400' },
+                { label: 'Proteína', current: data.summary.total.proteina, target: metas.proteina, unit: 'g', color: 'text-emerald-400' },
+                { label: 'Carboidrato', current: data.summary.total.carboidrato, target: metas.carboidrato, unit: 'g', color: 'text-blue-400' },
+                { label: 'Gordura', current: data.summary.total.gordura, target: metas.gordura, unit: 'g', color: 'text-yellow-400' },
+              ].map(item => {
+                const pct = getPercentage(item.current, item.target)
+                return (
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400">{item.label}</span>
+                      <span className={item.color}>
+                        {Math.round(item.current)} / {item.target} {item.unit} ({pct}%)
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${getBarColor(pct)}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {!metas && (
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center text-gray-500 text-sm">
+              <Target className="w-4 h-4 mx-auto mb-1" />
+              Faça uma avaliação para definir metas nutricionais
+            </div>
+          )}
         </div>
       )}
 

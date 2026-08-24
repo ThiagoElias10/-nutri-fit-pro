@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
-import { Calculator, History, Target } from 'lucide-react'
+import { Calculator, History, Target, Utensils } from 'lucide-react'
 
 export default function Assessments() {
   const { user } = useAuth()
@@ -12,6 +12,7 @@ export default function Assessments() {
 
   const [form, setForm] = useState({ idade: '', peso: '', altura: '', sexo: 'masculino', atividade: '1.55', objetivo: 'maintenance' })
   const [result, setResult] = useState<any>(null)
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     if (isProOrAdmin) api.clients.list().then(setClients)
@@ -38,6 +39,21 @@ export default function Assessments() {
       setResult(res)
       loadHistory()
     } catch (e: any) { alert(e.message) }
+  }
+
+  const generateMealPlan = async () => {
+    if (!isProOrAdmin) return
+    const targetClientId = clientId || user!.id
+    setGenerating(true)
+    try {
+      const plan = await api.mealPlans.generate(targetClientId as number)
+      alert(`Plano "${plan.nome}" criado com sucesso!`)
+      window.location.href = '/planos-alimentares'
+    } catch (e: any) {
+      alert('Erro ao gerar plano: ' + e.message)
+    } finally {
+      setGenerating(false)
+    }
   }
 
   return (
@@ -125,6 +141,13 @@ export default function Assessments() {
               <div className="bg-gray-800 rounded-lg p-3"><p className="text-lg font-bold text-blue-400">{result.carbG}g</p><p className="text-xs text-gray-400">Carboidratos</p></div>
               <div className="bg-gray-800 rounded-lg p-3"><p className="text-lg font-bold text-orange-400">{result.gorduraG}g</p><p className="text-xs text-gray-400">Gorduras</p></div>
             </div>
+
+            {isProOrAdmin && (
+              <button onClick={generateMealPlan} disabled={generating}
+                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                <Utensils className="w-4 h-4" /> {generating ? 'Gerando...' : 'Gerar Plano Alimentar'}
+              </button>
+            )}
           </div>
         )}
       </div>

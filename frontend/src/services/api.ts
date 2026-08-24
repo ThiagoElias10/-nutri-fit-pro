@@ -92,9 +92,10 @@ export const api = {
   mealPlans: {
     list: (client_id?: number) => request<MealPlan[]>(`/planos-alimentares${client_id ? `?client_id=${client_id}` : ''}`),
     get: (id: number) => request<MealPlan>('/planos-alimentares/' + id),
-    create: (data: Partial<MealPlan>) => request<MealPlan>('/planos-alimentares', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<MealPlan>) => request<MealPlan>('/planos-alimentares/' + id, { method: 'PUT', body: JSON.stringify(data) }),
+    create: (data: any) => request<MealPlan>('/planos-alimentares', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: any) => request<MealPlan>('/planos-alimentares/' + id, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) => request<void>('/planos-alimentares/' + id, { method: 'DELETE' }),
+    generate: (client_id: number, nome?: string) => request<MealPlan>('/planos-alimentares/gerar', { method: 'POST', body: JSON.stringify({ client_id, nome }) }),
   },
   foodDiary: {
     get: (client_id?: number, data?: string) => {
@@ -105,6 +106,10 @@ export const api = {
     },
     add: (data: Partial<DiaryEntry>) => request<DiaryEntry>('/diario-alimentar', { method: 'POST', body: JSON.stringify(data) }),
     delete: (id: number) => request<void>('/diario-alimentar/' + id, { method: 'DELETE' }),
+    metas: (client_id?: number) => {
+      const q = client_id ? `?client_id=${client_id}` : ''
+      return request<{ calorias: number; proteina: number; carboidrato: number; gordura: number; objetivo: string; peso: number } | null>(`/diario-alimentar/metas${q}`)
+    },
   },
   exercises: {
     list: (params?: { search?: string; grupo_muscular?: string; dificuldade?: string; pagina?: number }) => {
