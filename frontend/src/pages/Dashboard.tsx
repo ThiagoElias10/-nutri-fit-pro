@@ -1,30 +1,51 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../services/api'
-import { Activity, Users, ClipboardList, Target, Flame } from 'lucide-react'
+import { Activity, Users, ClipboardList, Target, Flame, RefreshCw } from 'lucide-react'
 
 export default function Dashboard() {
   const { user } = useAuth()
   const [data, setData] = useState<any>(null)
   const [lastAssessment, setLastAssessment] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const d = await api.dashboard()
+      setData(d)
+      if (user?.tipo === 'client') {
+        const a = await api.assessments.last()
+        setLastAssessment(a)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [user?.tipo])
+
+  useEffect(() => { loadData() }, [loadData])
 
   useEffect(() => {
-    api.dashboard().then(setData)
-    if (user?.tipo === 'client') {
-      api.assessments.last().then(setLastAssessment)
-    }
-  }, [])
+    const interval = setInterval(loadData, 30000)
+    return () => clearInterval(interval)
+  }, [loadData])
 
   const isPro = user?.tipo === 'professional'
   const isAdmin = user?.tipo === 'admin'
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-gray-400 mt-1">
-          {isAdmin ? 'Visão geral do sistema' : isPro ? 'Visão geral dos seus clientes' : 'Seu resumo diário'}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-gray-400 mt-1">
+            {isAdmin ? 'Visão geral do sistema' : isPro ? 'Visão geral dos seus clientes' : 'Seu resumo diário'}
+          </p>
+        </div>
+        <button onClick={loadData} disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-sm transition-colors disabled:opacity-50">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+        </button>
       </div>
 
       {isAdmin && (
@@ -119,5 +140,4 @@ export default function Dashboard() {
   )
 }
 
-function Utensils(props: any) { return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-}
+function Utensils(props: any) { return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> }

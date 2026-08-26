@@ -25,7 +25,8 @@ router.get('/dashboard', verificarToken, (req, res) => {
     const stats = db.get("SELECT COUNT(*) as c FROM usuarios WHERE tipo = 'client'").c;
     const profs = db.get("SELECT COUNT(*) as c FROM usuarios WHERE tipo = 'professional'").c;
     const avals = db.get('SELECT COUNT(*) as c FROM avaliacoes').c;
-    return res.json({ total_clientes: stats, total_profissionais: profs, total_avaliacoes: avals });
+    const planos = db.get('SELECT COUNT(*) as c FROM planos_alimentares').c;
+    return res.json({ total_clientes: stats, total_profissionais: profs, total_avaliacoes: avals, totalPlanos: planos });
   }
 
   if (req.usuario.tipo === 'professional') {
