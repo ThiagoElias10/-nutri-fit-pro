@@ -115,9 +115,9 @@ export default function Assessments() {
               <label className="text-xs text-gray-400 mb-1 block">Objetivo</label>
               <select value={form.objetivo} onChange={e => setForm(f => ({ ...f, objetivo: e.target.value }))}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="cutting">Cutting (déficit)</option>
-                <option value="maintenance">Manutenção</option>
-                <option value="bulking">Bulking (superávit)</option>
+                <option value="cutting">Emagrecer (déficit calórico)</option>
+                <option value="maintenance">Manter Peso</option>
+                <option value="bulking">Ganhar Massa (superávit calórico)</option>
               </select>
             </div>
           </div>

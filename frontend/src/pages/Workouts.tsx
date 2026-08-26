@@ -12,9 +12,9 @@ const OBJETIVOS = [
   { valor: 'forca', rotulo: 'Força' },
   { valor: 'definicao', rotulo: 'Definição' },
   { valor: 'condicionamento', rotulo: 'Condicionamento' },
-  { valor: 'maintenance', rotulo: 'Manutenção' },
-  { valor: 'bulking', rotulo: 'Bulking' },
-  { valor: 'cutting', rotulo: 'Cutting' },
+  { valor: 'maintenance', rotulo: 'Manter Peso' },
+  { valor: 'bulking', rotulo: 'Ganhar Massa' },
+  { valor: 'cutting', rotulo: 'Emagrecer' },
 ]
 
 function diaLabel(dia: number | null | undefined) {

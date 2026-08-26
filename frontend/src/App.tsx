@@ -10,6 +10,7 @@ import MealPlans from './pages/MealPlans'
 import FoodDiary from './pages/FoodDiary'
 import Workouts from './pages/Workouts'
 import Progress from './pages/Progress'
+import Recipes from './pages/Recipes'
 import Admin from './pages/Admin'
 import Profile from './pages/Profile'
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/planos-alimentares" element={<MealPlans />} />
         <Route path="/diario" element={<FoodDiary />} />
         <Route path="/treinos" element={<Workouts />} />
+        <Route path="/receitas" element={<Recipes />} />
         <Route path="/progresso" element={<Progress />} />
         {(user?.tipo === 'professional' || user?.tipo === 'admin') && (
           <Route path="/clientes" element={<Clients />} />
