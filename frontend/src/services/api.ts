@@ -1,6 +1,6 @@
 import type {
   AdminAcesso, AdminStats, AdminUser, AppNotification, Assessment, BodyMeasurement,
-  Client, DashboardAdmin, DashboardClient, DashboardProfessional, DiaryEntry, EvolutionData,
+  Client, DashboardAdmin, DashboardClient, DashboardProfessional, DiaryEntry, DiaryResponse, EvolutionData,
   Exercise, Food, LoginResult, MealPlan, Paginated, ProgressPhoto, Recipe, User, Workout, WorkoutGeneration, WorkoutGenerationInput, WorkoutLog, WorkoutLogInput,
 } from '../types'
 
@@ -102,13 +102,29 @@ export const api = {
       const q = new URLSearchParams()
       if (client_id) q.set('client_id', String(client_id))
       if (data) q.set('data', data)
-      return request<DiaryEntry[]>(`/diario-alimentar${q.toString() ? '?' + q : ''}`)
+      return request<DiaryResponse>(`/diario-alimentar${q.toString() ? '?' + q : ''}`)
     },
     add: (data: Partial<DiaryEntry>) => request<DiaryEntry>('/diario-alimentar', { method: 'POST', body: JSON.stringify(data) }),
     delete: (id: number) => request<void>('/diario-alimentar/' + id, { method: 'DELETE' }),
     metas: (client_id?: number) => {
       const q = client_id ? `?client_id=${client_id}` : ''
       return request<{ calorias: number; proteina: number; carboidrato: number; gordura: number; objetivo: string; peso: number } | null>(`/diario-alimentar/metas${q}`)
+    },
+    agua: (client_id?: number, data?: string) => {
+      const q = new URLSearchParams()
+      if (client_id) q.set('client_id', String(client_id))
+      if (data) q.set('data', data)
+      return request<{ copos: number }>(`/diario-alimentar/agua${q.toString() ? '?' + q : ''}`)
+    },
+    setAgua: (copos: number, client_id?: number, data?: string) => {
+      return request<{ ok: boolean; copos: number }>('/diario-alimentar/agua', {
+        method: 'POST',
+        body: JSON.stringify({ copos, client_id, data })
+      })
+    },
+    historicoAgua: (client_id?: number) => {
+      const q = client_id ? `?client_id=${client_id}` : ''
+      return request<{ data: string; copos: number }[]>(`/diario-alimentar/agua/historico${q}`)
     },
   },
   exercises: {

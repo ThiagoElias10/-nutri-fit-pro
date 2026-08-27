@@ -140,4 +140,56 @@ router.delete('/:id', verificarToken, validate(idParams, 'params'), (req, res) =
   res.status(204).send();
 });
 
+// Buscar ingestão de água
+router.get('/agua', verificarToken, (req, res) => {
+  const clientId = parseInt(req.query.client_id || req.usuario.id);
+  const data = req.query.data || new Date().toISOString().split('T')[0];
+
+  if (req.usuario.tipo === 'client' && clientId !== req.usuario.id) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+  if (req.usuario.tipo === 'professional' && clientId !== req.usuario.id && !verificarClienteAcessivel(req, clientId)) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+
+  const row = db.get('SELECT copos FROM agua_diaria WHERE client_id = ? AND data = ?', [clientId, data]);
+  res.json({ copos: row ? row.copos : 0 });
+});
+
+// Atualizar ingestão de água
+router.post('/agua', verificarToken, (req, res) => {
+  const clientId = parseInt((req.body && req.body.client_id) || req.usuario.id);
+  const data = req.body.data || new Date().toISOString().split('T')[0];
+  const copos = parseInt(req.body.copos) || 0;
+
+  if (req.usuario.tipo === 'client' && clientId !== req.usuario.id) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+  if (req.usuario.tipo === 'professional' && clientId !== req.usuario.id && !verificarClienteAcessivel(req, clientId)) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+
+  const existing = db.get('SELECT id FROM agua_diaria WHERE client_id = ? AND data = ?', [clientId, data]);
+  if (existing) {
+    db.run('UPDATE agua_diaria SET copos = ?, updated_at = datetime(\'now\',\'localtime\') WHERE id = ?', [copos, existing.id]);
+  } else {
+    db.run('INSERT INTO agua_diaria (client_id, data, copos) VALUES (?,?,?)', [clientId, data, copos]);
+  }
+  res.json({ ok: true, copos });
+});
+
+// Buscar histórico de água (últimos 7 dias)
+router.get('/agua/historico', verificarToken, (req, res) => {
+  const clientId = parseInt(req.query.client_id || req.usuario.id);
+  if (req.usuario.tipo === 'client' && clientId !== req.usuario.id) {
+    return res.status(403).json({ erro: 'Acesso não autorizado' });
+  }
+
+  const rows = db.query(
+    'SELECT data, copos FROM agua_diaria WHERE client_id = ? ORDER BY data DESC LIMIT 7',
+    [clientId]
+  );
+  res.json(rows.reverse());
+});
+
 module.exports = router;

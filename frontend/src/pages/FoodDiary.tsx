@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
-import { Plus, Trash2, Search, UtensilsCrossed, Target } from 'lucide-react'
+import { Plus, Trash2, Search, UtensilsCrossed, Target, Droplets } from 'lucide-react'
 
 export default function FoodDiary() {
   const { user } = useAuth()
@@ -11,6 +11,7 @@ export default function FoodDiary() {
   const [data, setData] = useState<any>(null)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [metas, setMetas] = useState<any>(null)
+  const [copos, setCopos] = useState(0)
 
   const [foods, setFoods] = useState<any[]>([])
   const [foodSearch, setFoodSearch] = useState('')
@@ -29,11 +30,22 @@ export default function FoodDiary() {
     setMetas(m)
   }
 
+  const loadAgua = async () => {
+    const cid = clientId || undefined
+    const a = await api.foodDiary.agua(cid as any, date)
+    setCopos(a.copos)
+  }
+
+  const saveAgua = async (novosCopos: number) => {
+    setCopos(novosCopos)
+    await api.foodDiary.setAgua(novosCopos, clientId || undefined, date)
+  }
+
   useEffect(() => {
     if (isProOrAdmin) api.clients.list().then(setClients)
   }, [])
 
-  useEffect(() => { loadDiary(); loadMetas() }, [clientId, date])
+  useEffect(() => { loadDiary(); loadMetas(); loadAgua() }, [clientId, date])
 
   useEffect(() => {
     if (foodSearch.length > 1) api.foods.list(foodSearch).then((r) => setFoods(r.dados))
@@ -156,6 +168,32 @@ export default function FoodDiary() {
               Faça uma avaliação para definir metas nutricionais
             </div>
           )}
+
+          <div className="bg-gray-900 border border-blue-500/20 rounded-xl p-4">
+            <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
+              <Droplets className="w-4 h-4 text-blue-400" />
+              <span>Hidratação diária</span>
+              <span className="ml-auto text-blue-400 font-semibold">{copos} / 8 copos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                <button
+                  key={i}
+                  onClick={() => saveAgua(i === copos ? i - 1 : i)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                    i <= copos
+                      ? 'bg-blue-500/30 text-blue-400 border border-blue-500/50'
+                      : 'bg-gray-800 text-gray-500 border border-gray-700 hover:border-blue-500/30'
+                  }`}
+                >
+                  {i <= copos ? '💧' : '○'}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-600 mt-2 text-center">
+              Meta: 8 copos (2L) por dia
+            </p>
+          </div>
         </div>
       )}
 

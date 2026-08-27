@@ -19,7 +19,7 @@ function clienteAlvo(req, res) {
     return null;
   }
   if (req.usuario.tipo === 'professional' && clientId !== req.usuario.id && !verificarClienteAcessivel(req, clientId)) {
-    res.status(403).json({ erro: 'Acesso não autorizado' });
+    res.status(403).json({ erro: 'Acesso não autorizado' });  
     return null;
   }
   return clientId;

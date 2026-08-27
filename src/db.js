@@ -60,6 +60,7 @@ const MIGRATIONS = [
   { version: 4, name: 'indices', up: migracaoIndices },
   { version: 5, name: 'treino-semanal', up: migracaoTreinoSemanal },
   { version: 6, name: 'biblioteca-exercicios', up: migracaoBibliotecaExercicios },
+  { version: 7, name: 'agua-diaria', up: migracaoAguaDiaria },
 ];
 
 const IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
@@ -414,6 +415,19 @@ function migracaoTreinoSemanal() {
   } catch (e) {
     if (!String(e.message).includes('duplicate column')) throw e;
   }
+}
+
+function migracaoAguaDiaria() {
+  db.exec(`CREATE TABLE IF NOT EXISTS agua_diaria (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL REFERENCES usuarios(id),
+    data DATE NOT NULL,
+    copos INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT (datetime('now','localtime')),
+    updated_at DATETIME DEFAULT (datetime('now','localtime'))
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_agua_client_data ON agua_diaria(client_id, data)');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_agua_unique ON agua_diaria(client_id, data)');
 }
 
 function garantirExercicios() {

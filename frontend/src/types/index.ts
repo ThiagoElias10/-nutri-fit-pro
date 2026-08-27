@@ -63,6 +63,8 @@ export interface WorkoutGeneration {
 
 export interface DiaryEntry { id: number; client_id?: number; data: string; refeicao: string; alimento_id: number; quantidade: number; calorias: number; proteina: number; carboidrato: number; gordura: number; alimento_nome?: string; unidade?: string }
 
+export interface DiaryResponse { entries: DiaryEntry[]; summary: { refeicoes: Record<string, DiaryEntry[]>; total: { calorias: number; proteina: number; carboidrato: number; gordura: number } } }
+
 export interface BodyMeasurement { id: number; client_id: number; peso: number | null; cintura: number | null; abdomen: number | null; gordura_corporal: number | null; created_at: string; [key: string]: any }
 
 export interface LoginResult { token: string; forcar_troca_senha: boolean; usuario: User }
